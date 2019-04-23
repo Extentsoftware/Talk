@@ -1,32 +1,35 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace Talk
 {
-    public class KeywordTokeniser : RegExTokeniser
+    public class KeywordTokeniser : EntityTokeniser
     {
-        public override void BeginParse(string text, Dictionary<string, object> Properties)
-        {
-            foreach (var di in Properties)
-            {
-                if (di.Value is string txt)
-                {
-                    var handler = new Handler
-                    {
-                        Expression = $"{txt}",
-                        Parser = (match, properties) =>
-                        {
-                            var token = new KeywordToken { Text = match.Value, Length = match.Length, Pos = match.Index };
-                            token.Subtypes.Add(di.Key);
-                            return token;
-                        }
-                    };
+        ITalkConfig _settings;
 
-                    Expressions.Add(handler);
+        public KeywordTokeniser(ITalkConfig settings)
+        {
+            _settings = settings;
+        }
+
+        public override List<Token> GetTokens(string textfragment, Dictionary<string, object> Properties)
+        {
+            List<Token> tokens = new List<Token>();
+
+            foreach (var category in _settings.Keywords)
+            {
+                foreach (var exp in category.Items)
+                {
+                    Regex regex = new Regex(exp, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+                    Match x = regex.Match(textfragment);
+                    if (x.Success)
+                    {
+                        tokens.Add(new KeywordToken { Text = x.Value, Length = x.Length, Pos = x.Index, Subtypes = new List<string> { category.Category } });
+                    }
                 }
             }
+            return tokens;
         }
-        protected override List<Handler> Expressions { get; set; } = new List<Handler>();
+    }
 
-    };
 }
-

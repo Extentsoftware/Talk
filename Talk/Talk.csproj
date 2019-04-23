@@ -6,12 +6,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="NegIntentToken.cs" />
+    <Compile Remove="NegIntentTokeniser.cs" />
+    <Compile Remove="NegTactical.cs" />
+    <Compile Remove="NegTacticalTokeniser.cs" />
+    <Compile Remove="PosTacticalToken.cs" />
+    <Compile Remove="PosTacticalTokeniser.cs" />
+    <Compile Remove="QuestionToken.cs" />
+    <Compile Remove="QuestionTokeniser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LogFramework.Microsoft.Extensions.Logging" Version="1.0.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.ApplicationInsights" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
   </ItemGroup>
 

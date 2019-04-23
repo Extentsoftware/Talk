@@ -7,9 +7,9 @@ public class DateTokeniser : EntityTokeniser
 {
     private const string ReplacePattern = "${day}/${month}/${year}";
 
-    IAppSettings _settings;
+    ITalkConfig _settings;
 
-    public DateTokeniser(IAppSettings settings)
+    public DateTokeniser(ITalkConfig settings)
     {
         _settings = settings;
     }

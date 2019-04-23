@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace Talk
+﻿namespace Talk
 {
     public class KeywordToken : Token
-    {       
+    {
     }
+
 }

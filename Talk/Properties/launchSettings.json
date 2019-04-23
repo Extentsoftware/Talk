@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Talk": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "APPINSIGHTS_INSTRUMENTATIONKEY": "e5bbcf54-f72b-400e-9cd2-09a12c31570c"
+      }
+    }
+  }
+}

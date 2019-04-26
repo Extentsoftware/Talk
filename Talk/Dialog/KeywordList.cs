@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Talk
+namespace Talk.Dialog
 {
+    /// <summary>
+    /// List of keywords in a specific category
+    /// </summary>
     public class KeywordList
     {
         public string Category { get; set; }

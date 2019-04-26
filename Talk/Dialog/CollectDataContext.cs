@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 
-namespace Talk
+namespace Talk.Dialog
 {
     public class TalkContext
     {
-        public TalkConfig Config;
+        public DialogConfig Config;
         public Dictionary<string, object> Properties = new Dictionary<string, object>();
         public Dictionary<string, object> CollectedData = new Dictionary<string, object>();
 

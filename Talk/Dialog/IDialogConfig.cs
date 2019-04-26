@@ -1,6 +1,6 @@
-﻿namespace Talk
+﻿namespace Talk.Dialog
 {
-    public interface ITalkConfig
+    public interface IDialogConfig
     {
         string[] DateCleanupFormats { get; set; }
         string[] DateFormats { get; set; }

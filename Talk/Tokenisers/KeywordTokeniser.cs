@@ -1,13 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Talk.Dialog;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
-    public class KeywordTokeniser : EntityTokeniser
+    internal class KeywordTokeniser : EntityTokeniser
     {
-        ITalkConfig _settings;
+        IDialogConfig _settings;
 
-        public KeywordTokeniser(ITalkConfig settings)
+        public KeywordTokeniser(IDialogConfig settings)
         {
             _settings = settings;
         }

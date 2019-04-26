@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Talk
+namespace Talk.Dialog
 {
-    public class TalkConfig : ITalkConfig
+    public class DialogConfig : IDialogConfig
     {
         public string[] DateCleanupFormats { get; set; }
         public string[] DateFormats { get; set; }

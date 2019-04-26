@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
-    public class AmountTokeniser : RegExTokeniser
+    internal class AmountTokeniser : RegExTokeniser
     {
         protected override List<Handler> Expressions { get; set; } = new List<Handler> {
                 new Handler{

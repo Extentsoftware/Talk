@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Dialog
 {
     class CollectPropertyMatch
     {
         public CollectProperty Property;
-        public List<TokenNode> MatchingTokens;
+        public List<Token> MatchingTokens;
     }
 }

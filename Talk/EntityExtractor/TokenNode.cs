@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Talk
+namespace Talk.EntityExtractor
 {
-    public class TokenNode
+    internal class TokenNode
     {
         public TokenNode()
         {
             Children = new List<TokenNode>();
         }
 
-        public Token Token;
+        internal Token Token;
 
         /// <summary>
         /// child tokens
         /// </summary>
-        public List<TokenNode> Children;
+        internal List<TokenNode> Children;
 
-        public void PrintTree(int indent)
+        internal void PrintTree(int indent)
         {
             Console.WriteLine($"{new string(' ', indent)} {Token.ToString()}");
 
@@ -27,12 +27,18 @@ namespace Talk
                 c.PrintTree(indent);
         }
 
-        public void Flatten(List<List<TokenNode>> master, List<TokenNode> list)
+        /// <summary>
+        /// recursive routing that creates flattened lists of token lists from a tree structure
+        /// </summary>
+        /// <param name="master"></param>
+        /// <param name="list"></param>
+        internal void Flatten(List<List<TokenNode>> master, List<TokenNode> list)
         {
             List<TokenNode> newlist = new List<TokenNode>(list)
             {
                 this
             };
+
             foreach (var c in Children)
                 c.Flatten(master, newlist);
 

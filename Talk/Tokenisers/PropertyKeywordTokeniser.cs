@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
     /// <summary>
     /// Tokeniser that looks for string properties such as proper nouns and finds them in the text
     /// The tokeniser does not perform stemming or any other manipulation of the input text other
     /// than it is case-insensitive.
     /// </summary>
-    public class PropertyKeywordTokeniser : RegExTokeniser
+    internal class PropertyKeywordTokeniser : RegExTokeniser
     {
         public override void BeginParse(string text, Dictionary<string, object> Properties)
         {

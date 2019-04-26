@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
-    public interface IEntityTokeniser
+    internal interface IEntityTokeniser
     {
         List<Token> GetTokens(string textfragment, Dictionary<string, object> Properties);
         void BeginParse(string text, Dictionary<string, object> Properties);

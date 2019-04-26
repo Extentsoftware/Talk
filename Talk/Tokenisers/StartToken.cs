@@ -1,6 +1,8 @@
-﻿namespace Talk
+﻿using Talk.EntityExtractor;
+
+namespace Talk.Tokenisers
 {
-    public class StartToken : Token
+    internal class StartToken : Token
     {
         public override string ToString()
         {

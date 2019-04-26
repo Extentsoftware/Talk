@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
-    public abstract class RegExTokeniser : EntityTokeniser
+    internal abstract class RegExTokeniser : EntityTokeniser
     {
         protected abstract List<Handler> Expressions { get; set; }
 

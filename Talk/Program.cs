@@ -4,9 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
+using Talk.Dialog;
+using Talk.EntityExtractor;
+using Talk.Tokenisers;
 
 namespace Talk
 {
@@ -26,7 +27,7 @@ namespace Talk
                .AddTransient<IEntityTokeniser, KeywordTokeniser>()
                .AddTransient<IEntityTokeniser, PropertyKeywordTokeniser>()
                .AddTransient<IEntityTokeniser, AmountTokeniser>()
-               .AddSingleton<ITalkConfig>(talkConfig);
+               .AddSingleton<IDialogConfig>(talkConfig);
                
 
             services.AddLogging(loggingBuilder =>
@@ -67,69 +68,78 @@ namespace Talk
                 {
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="neg_escalation",
+                          CapturedTemplate="neg_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="NegTacticalToken" }
+                          Expression=new TokenMatchExpression{ Token="NegTacticalToken" }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="neg_escalation",
+                          CapturedTemplate="neg_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="NegIntentToken" }
+                          Expression=new TokenMatchExpression{ Token="NegIntentToken" }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="pos_escalation",
+                          CapturedTemplate="pos_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="PosTacticalToken" }
+                          Expression=new TokenMatchExpression{ Token="PosTacticalToken" }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="future_escalation",
+                          CapturedTemplate="future_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes=new string[] { "Future" } }
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes=new string[] { "Future" } }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_dob",
+                          CapturedTemplate="got_dob",
                           PropertyName = "Birthday",
-                          Prompt="missing_dob",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Birthday" } }
+                          PromptTemplate="missing_dob",
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Birthday" } }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Warning,
-                          MessageTemplate="got_payment_toolow",
+                          CapturedTemplate="got_payment_toolow",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "<MinimumPayment" } }
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "<MinimumPayment" } }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Warning,
-                          MessageTemplate="got_payment_toohi",
+                          CapturedTemplate="got_payment_toohi",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { ">MaximumPayment" } }
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { ">MaximumPayment" } }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_payment_day",
+                          CapturedTemplate="got_payment_day",
                           PropertyName = "PaymentDay",
-                          Prompt="missing_when",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Today" } }
+                          PromptTemplate="missing_when",
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Today" } }
                      },
                      new CollectProperty
                      {
+                          Weight = 1,
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_payment_amount",
+                          CapturedTemplate="got_payment_amount",
                           PropertyName = "PaymentAmount",
-                          Prompt="missing_payment",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "=MinimumPayment", ">MinimumPayment" } }
+                          PromptTemplate="missing_payment",
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "=MinimumPayment", ">MinimumPayment" } }
                      }
                 },
             };
@@ -150,7 +160,7 @@ namespace Talk
                     { "future_escalation", "Escalated!!" },
                     { "got_payment_confirm", "got_payment_day [PaymentDay]" },
                     { "missing_dob", "your DoB, this is for security" },
-                    { "missing_payment", "a payment amount between [MinimumPayment] and [MaximumPayment]" },
+                    { "missing_payment", "a payment amount between [MinimumPayment] and [MaximumPayment] " },
                     { "missing_when", "when can you make this payment" }
                 },
                 DataToCollect = new List<CollectProperty>
@@ -158,68 +168,68 @@ namespace Talk
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="neg_escalation",
+                          CapturedTemplate="neg_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="NegTacticalToken" }
+                          Expression=new TokenMatchExpression{ Token="NegTacticalToken" }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="neg_escalation",
+                          CapturedTemplate="neg_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="NegIntentToken" }
+                          Expression=new TokenMatchExpression{ Token="NegIntentToken" }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="pos_escalation",
+                          CapturedTemplate="pos_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="PosTacticalToken" }
+                          Expression=new TokenMatchExpression{ Token="PosTacticalToken" }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Fail,
-                          MessageTemplate="future_escalation",
+                          CapturedTemplate="future_escalation",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes=new string[] { "Future" } }
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes=new string[] { "Future" } }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_dob",
+                          CapturedTemplate="got_dob",
                           PropertyName = "Birthday",
-                          Prompt="missing_dob",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Birthday" } }
+                          PromptTemplate="missing_dob",
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Birthday" } }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Warning,
-                          MessageTemplate="got_payment_toolow",
+                          CapturedTemplate="got_payment_toolow",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "<MinimumPayment" } }
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "<MinimumPayment" } }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Warning,
-                          MessageTemplate="got_payment_toohi",
+                          CapturedTemplate="got_payment_toohi",
                           PropertyName = "",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { ">MaximumPayment" } }
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { ">MaximumPayment" } }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_payment_day",
+                          CapturedTemplate="got_payment_day",
                           PropertyName = "PaymentDay",
-                          Prompt="missing_when",
-                          Expression=new PropertyMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Today" } }
+                          PromptTemplate="missing_when",
+                          Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Today" } }
                      },
                      new CollectProperty
                      {
                           Result = CollectProperty.CollectionResult.Collect,
-                          MessageTemplate="got_payment_amount",
+                          CapturedTemplate="got_payment_amount",
                           PropertyName = "PaymentAmount",
-                          Prompt="missing_payment",
-                          Expression=new PropertyMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "=MinimumPayment", ">MinimumPayment" } }
+                          PromptTemplate="missing_payment",
+                          Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "=MinimumPayment", ">MinimumPayment" } }
                      }
                 },
             };
@@ -254,29 +264,12 @@ namespace Talk
 
             //PerformStep(context);
 
-            var list = Talk.ParseText(context.Properties, "please take money 20 3rd march 1999 hate this stuff paid marcus poulton", _serviceProvider);
-            Talk.ListFlattenedTokens(list);
+            //var list = Talk.ParseText(context.Properties, "please take money 20 3rd march 1999 hate this stuff paid marcus poulton", _serviceProvider);
+            var list = Parser.ParseText(context.Properties, "20 3 3 1999 100", _serviceProvider);
+            Parser.ListFlattenedTokens(list);
 
-        }
+            var best = DialogEngine.MostLikely(list, step1.DataToCollect);
 
-        private static List<TokenNode> ParseText(Dictionary<string, object> properties, string customerMessage, IServiceProvider serviceProvider)
-        {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                var tokenisers = scope.ServiceProvider.GetServices<IEntityTokeniser>();
-
-                TokenTree tree = new TokenTree()
-                    .Build(tokenisers, customerMessage, properties);
-
-                var flattenedTokens = tree.Flatten();
-
-                // occam's razor, pick the least complicated solution
-                var intent = flattenedTokens.OrderBy(x => x.Count).First();
-
-                Talk.ListTokens(intent);
-
-                return intent;
-            }
         }
 
         private static void PerformStep(TalkContext context)
@@ -286,7 +279,7 @@ namespace Talk
             do
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(Talk.Substitute(nextPrompt, context.Properties));
+                Console.WriteLine(DialogEngine.Substitute(nextPrompt, context.Properties));
 
                 Console.ForegroundColor = ConsoleColor.White;
                 var quest = Console.ReadLine();
@@ -295,7 +288,7 @@ namespace Talk
 
                 Console.ForegroundColor = ConsoleColor.Gray;
 
-                (quit, nextPrompt) = Talk.ProcessResponse(context, quest, _serviceProvider);
+                (quit, nextPrompt) = DialogEngine.ProcessResponse(context, quest, _serviceProvider);
 
             } while (!quit);
 
@@ -304,7 +297,7 @@ namespace Talk
         }
 
 
-        public static TalkConfig BuildConfiguration()
+        public static DialogConfig BuildConfiguration()
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -313,7 +306,7 @@ namespace Talk
                 .Build();
 
             // get settings from config manager into 
-            var talkConfig = config.Get<TalkConfig>();
+            var talkConfig = config.Get<DialogConfig>();
 
             if (talkConfig == null)
                 throw new ApplicationException("Configuration error: Could not instantiate app settings");

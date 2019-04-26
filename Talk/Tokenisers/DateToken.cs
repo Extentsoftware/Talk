@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Tokenisers
 {
-    public class DateToken : Token
+    internal class DateToken : Token
     {
         public DateTime Value;
 

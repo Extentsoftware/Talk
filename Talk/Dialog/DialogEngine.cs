@@ -3,21 +3,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Talk.EntityExtractor;
 
-namespace Talk
+namespace Talk.Dialog
 {
 
-    internal class Talk
+    internal static class DialogEngine
     {
+        /// <summary>
+        /// calculate the importance of the token list given a list of properties to collect
+        /// </summary>
+        /// <param name="tokenlist"></param>
+        /// <returns></returns>
+        internal static double Weight(this List<Token> tokenlist, List<CollectProperty> collectProperties)
+        {
+            // collect all data from tokens
+            var matches = Contains(tokenlist, collectProperties);
+            return matches.Sum(x => x.Property.Weight);
+        }
+
+        /// <summary>
+        /// returns the most likely token stream from a list of potentials
+        /// </summary>
+        /// <param name="flattenedTree"></param>
+        /// <param name="collectProperties"></param>
+        /// <returns></returns>
+        internal static List<Token> MostLikely(this List<List<Token>> flattenedTree, List<CollectProperty> collectProperties)
+        {
+            return flattenedTree.OrderBy(x => x.Weight(collectProperties)).FirstOrDefault();
+        }
+
         internal static (bool, string) ProcessResponse(TalkContext context, string customerMessage, IServiceProvider serviceProvider)
         {
             List<string> botResponse = new List<string>();
 
             // decode their response
-            var customerResponse = GetNextResponse(context, customerMessage, serviceProvider);
+            var responseTokenList = GetNextResponse(context, customerMessage, serviceProvider);
 
             // collect all data from tokens
-            var matches = Contains(customerResponse, context.CurrentStep.DataToCollect);
+            var matches = Contains(responseTokenList, context.CurrentStep.DataToCollect);
 
             // report any failures
             var fail_matches = matches.Where(x => x.Property.Result == CollectProperty.CollectionResult.Fail).ToList();
@@ -28,7 +52,7 @@ namespace Talk
             var warn_matches = matches.Where(x => x.Property.Result == CollectProperty.CollectionResult.Warning).ToList();
             if (warn_matches != null && warn_matches.Count > 0)
                 foreach (var warning in warn_matches)
-                    botResponse.Add(MakeMessageFromKey(warning.Property.MessageTemplate, context));
+                    botResponse.Add(MakeMessageFromKey(warning.Property.CapturedTemplate, context));
 
             var collect_matches = matches.Where(x => x.Property.Result == CollectProperty.CollectionResult.Collect).ToList();
             var reqrd_matches = context.CurrentStep.DataToCollect.Where(x => x.Result == CollectProperty.CollectionResult.Collect).ToList();
@@ -43,8 +67,8 @@ namespace Talk
                     if (context.CollectedData.ContainsKey(key))
                         context.CollectedData.Remove(key);
 
-                    context.CollectedData.Add(collect.Property.PropertyName, collect.MatchingTokens.First().Token.Text);
-                    botResponse.Add(MakeMessageFromKey(collect.Property.MessageTemplate, context));
+                    context.CollectedData.Add(collect.Property.PropertyName, collect.MatchingTokens.First().Text);
+                    botResponse.Add(MakeMessageFromKey(collect.Property.CapturedTemplate, context));
                 }
             }
 
@@ -66,13 +90,13 @@ namespace Talk
             {
                 botResponse.Add(MakeMessageFromKey(context.CurrentStep.InCompleteManyPrompt, context));
                 for (int i = 1; i <= missing.Count; i++)
-                    botResponse.Add($"{i}) " + MakeMessageFromKey(missing[i - 1].Prompt, context));
+                    botResponse.Add($"{i}) " + MakeMessageFromKey(missing[i - 1].PromptTemplate, context));
             }
 
             if (missing.Count == 1)
             {
                 var s1 = MakeMessageFromKey(context.CurrentStep.InCompleteSinglePrompt, context);
-                var s2 = MakeMessageFromKey(missing[0].Prompt, context);
+                var s2 = MakeMessageFromKey(missing[0].PromptTemplate, context);
                 botResponse.Add(s1 + s2);
             }
 
@@ -100,14 +124,13 @@ namespace Talk
             return msg_template;
         }
 
-
         /// <summary>
         /// matches a list of expressions in a token list
         /// </summary>
         /// <param name="tokens"></param>
         /// <param name="expressions"></param>
         /// <returns></returns>
-        private static List<CollectPropertyMatch> Contains(List<TokenNode> tokens, List<CollectProperty> expressions)
+        private static List<CollectPropertyMatch> Contains(List<Token> tokens, List<CollectProperty> expressions)
         {
             List<CollectPropertyMatch> MatchingTokens = new List<CollectPropertyMatch>();
             foreach (var expression in expressions)
@@ -125,12 +148,12 @@ namespace Talk
         /// <param name="tokens"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        private static List<TokenNode> Contains(List<TokenNode> tokens, PropertyMatchExpression expression)
+        private static List<Token> Contains(List<Token> tokens, TokenMatchExpression expression)
         {
-            List<TokenNode> MatchingTokens = new List<TokenNode>();
+            List<Token> MatchingTokens = new List<Token>();
             foreach (var t in tokens)
             {
-                if (t.Token.GetType().Name == expression.Token)
+                if (t.GetType().Name == expression.Token)
                 {
                     if (expression.AnySubtypes == null)
                         MatchingTokens.Add(t);
@@ -138,7 +161,7 @@ namespace Talk
                     {
                         foreach (var subtype in expression.AnySubtypes)
                         {
-                            if (subtype == null || (t.Token.Subtypes.Contains(subtype)))
+                            if (subtype == null || (t.Subtypes.Contains(subtype)))
                                 MatchingTokens.Add(t);
                         }
                     }
@@ -147,55 +170,11 @@ namespace Talk
             return MatchingTokens;
         }
 
-        private static TokenNode Contains(List<TokenNode> tokens, Type tokenType, string subtype = null)
+        private static List<Token> GetNextResponse(TalkContext context, string customerMessage, IServiceProvider serviceProvider)
         {
-            foreach (var t in tokens)
-                if (t.Token.GetType() == tokenType)
-                    if (subtype == null || (t.Token.Subtypes.Contains(subtype)))
-                        return t;
-            return null;
-        }
+            var flattenedTokens = Parser.ParseText(context.Properties, customerMessage, serviceProvider);
 
-        public static List<List<TokenNode>> ParseText(Dictionary<string, object> properties, string customerMessage, IServiceProvider serviceProvider)
-        {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                var tokenisers = scope.ServiceProvider.GetServices<IEntityTokeniser>();
-
-                TokenTree tree = new TokenTree()
-                    .Build(tokenisers, customerMessage, properties);
-
-                var flattenedTokens = tree.Flatten();
-
-                return flattenedTokens;
-            }
-        }
-
-
-        private static List<TokenNode> GetNextResponse(TalkContext context, string customerMessage, IServiceProvider serviceProvider)
-        {
-            var flattenedTokens = ParseText(context.Properties, customerMessage, serviceProvider);
-
-            // occam's razor, pick the least complicated solution
-            var intent = flattenedTokens.OrderBy(x => x.Count).First();
-
-            // ListTokens(intent);
-
-            return intent;
-        }
-
-        public static void ListFlattenedTokens(List<List<TokenNode>> flattenedIntents)
-        {
-            Console.WriteLine($"{flattenedIntents.Count} intents");
-            foreach (var intent in flattenedIntents)
-                ListTokens(intent);
-        }
-
-        public static void ListTokens(List<TokenNode> intent)
-        {
-            foreach (var tokenNode in intent)
-                Console.Write($"{tokenNode.Token} ");
-            Console.WriteLine("");
+            return flattenedTokens.MostLikely(context.CurrentStep.DataToCollect);
         }
     }
 

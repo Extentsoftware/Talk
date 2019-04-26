@@ -1,25 +1,70 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Talk.Tokenisers;
 
-namespace Talk
+namespace Talk.EntityExtractor
 {
-    public static class TokenTreeExtensions
+    internal static class Parser
     {
-        public static TokenTree PrintTree(this TokenTree tree)
+        /// <summary>
+        /// parse text using entity extractors into a list of tokens lists
+        /// </summary>
+        /// <param name="properties"></param>
+        /// <param name="customerMessage"></param>
+        /// <param name="serviceProvider"></param>
+        /// <returns></returns>
+        public static List<List<Token>> ParseText(Dictionary<string, object> properties, string customerMessage, IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var tokenisers = scope.ServiceProvider.GetServices<IEntityTokeniser>();
+
+                TokenTree tree = new TokenTree()
+                    .Build(tokenisers, customerMessage, properties);
+
+                var flattenedTokens = tree.Flatten();
+
+                return flattenedTokens;
+            }
+        }
+
+
+        internal static void ListFlattenedTokens(List<List<Token>> flattenedIntents)
+        {
+            Console.WriteLine($"{flattenedIntents.Count} intents");
+            foreach (var intent in flattenedIntents)
+                ListTokens(intent);
+        }
+
+        internal static void ListTokens(List<Token> intent)
+        {
+            foreach (var tokenNode in intent)
+                Console.Write($"{tokenNode} ");
+            Console.WriteLine("");
+        }
+
+        internal static TokenTree PrintTree(this TokenTree tree)
         {
             tree.Head.PrintTree(0);
             return tree;
         }
 
-        public static List<List<TokenNode>> Flatten(this TokenTree tree)
+        internal static List<List<Token>> Flatten(this TokenTree tree)
         {
             List<List<TokenNode>> master = new List<List<TokenNode>>();
             List<TokenNode> list = new List<TokenNode>();
             tree.Head.Flatten(master,list);
-            return master;
+
+            List<List<Token>> final = new List<List<Token>>();
+            foreach( var tnl in master)
+                final.Add( tnl.Select(x => x.Token).ToList() );
+
+            return final;
         }
 
-        static public TokenTree Build(this TokenTree tree, IEnumerable<IEntityTokeniser> tokenisers, string text, Dictionary<string, object> properties)
+        static internal TokenTree Build(this TokenTree tree, IEnumerable<IEntityTokeniser> tokenisers, string text, Dictionary<string, object> properties)
         {
             foreach (var tokeniser in tokenisers)
                 tokeniser.BeginParse(text, properties);
@@ -38,7 +83,7 @@ namespace Talk
         }
 
         /// <summary>
-        ///  tokenise the text into a token tree
+        ///  tokenise the text into a token tree. This method is recursive.
         /// </summary>
         /// <param name="text"></param>
         /// <param name="recognisers"></param>

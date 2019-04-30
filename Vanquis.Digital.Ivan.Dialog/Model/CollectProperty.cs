@@ -1,4 +1,4 @@
-﻿namespace Talk.Dialog
+﻿namespace Vanquis.Digital.Ivan.Dialog.Model
 {
     /// <summary>
     /// configuration item that specifies a prroperty to capture
@@ -34,7 +34,9 @@
         public CollectionResult Result;
 
         /// <summary>
-        /// message template to emit if this item has been captured
+        /// message template to emit if this item has been captured. 
+        /// leave blank to silently capture his item else
+        /// this will be repeated back to human
         /// </summary>
         public string CapturedTemplate;
 

@@ -51,16 +51,33 @@ namespace Talk.Dialog
             // find warnings
             var warn_matches = matches.Where(x => x.Property.Result == CollectProperty.CollectionResult.Warning).ToList();
             if (warn_matches != null && warn_matches.Count > 0)
+            {
                 foreach (var warning in warn_matches)
+                {
+                    // remove any collected data that matches this property name
+                    if (!string.IsNullOrEmpty(warning.Property.PropertyName))
+                    {
+                        matches.RemoveAll( x=> x.Property.Result == CollectProperty.CollectionResult.Collect && x.Property.PropertyName == warning.Property.PropertyName);
+                    }
                     botResponse.Add(MakeMessageFromKey(warning.Property.CapturedTemplate, context));
+                }
+            }
 
             var collect_matches = matches.Where(x => x.Property.Result == CollectProperty.CollectionResult.Collect).ToList();
             var reqrd_matches = context.CurrentStep.DataToCollect.Where(x => x.Result == CollectProperty.CollectionResult.Collect).ToList();
 
             bool got_everything = (reqrd_matches.Count == context.CollectedData.Count);
 
+
+
             if (collect_matches != null && collect_matches.Count > 0)
             {
+                if (!string.IsNullOrEmpty(context.CurrentStep.CapturedPrompt))
+                {
+                    var msg = MakeMessageFromKey(context.CurrentStep.CapturedPrompt, context);
+                    botResponse.Add(msg);
+                }
+
                 foreach (var collect in collect_matches)
                 {
                     var key = collect.Property.PropertyName;
@@ -68,7 +85,13 @@ namespace Talk.Dialog
                         context.CollectedData.Remove(key);
 
                     context.CollectedData.Add(collect.Property.PropertyName, collect.MatchingTokens.First().Text);
-                    botResponse.Add(MakeMessageFromKey(collect.Property.CapturedTemplate, context));
+
+                    // show message detailing what I got tis time around
+                    if (!string.IsNullOrEmpty(context.CurrentStep.CapturedPrompt))
+                    {
+                        var msg = MakeMessageFromKey(collect.Property.CapturedTemplate, context);
+                        botResponse.Add(msg);
+                    }
                 }
             }
 

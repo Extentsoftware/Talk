@@ -29,5 +29,6 @@ namespace Talk.Dialog
         internal string CompletePrompt;
         internal string InCompleteSinglePrompt;
         internal string InCompleteManyPrompt;
+        internal string CapturedPrompt;
     }
 }

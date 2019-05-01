@@ -128,7 +128,7 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk.TestConsole
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.BackgroundColor = ConsoleColor.Black;
-                    Console.WriteLine($"Bot Fail: {botres} {failAction.Reason} {string.Join(",", failAction.Rejections)}");
+                    Console.WriteLine($"Bot Fail: {botres} {failAction.Reason} {string.Join(",", failAction.Rejections.Select(x=>x.PropertyName))}");
 
                     if (typeof(FailAction) != response.Bot.GetType())
                     {

@@ -38,6 +38,7 @@ namespace Talk
                 {
                     new CollectProperty
                     {
+                        PropertyName = "NegativeEscalation",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Fail,
                         CapturedTemplate="negpos_escalation",
@@ -45,6 +46,7 @@ namespace Talk
                     },
                     new CollectProperty
                     {
+                        PropertyName = "FutureDate",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Fail,
                         CapturedTemplate="future_escalation",
@@ -52,7 +54,8 @@ namespace Talk
                     },
                     new CollectProperty
                     {
-                    
+                        PropertyName = "PastDate",
+                        MaxTries = 3,
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Warning,
                         CapturedTemplate="past_warning",
@@ -60,45 +63,45 @@ namespace Talk
                     },
                     new CollectProperty
                     {
+                        PropertyName = "CapturedBirthday",
                         Weight = 5,
                         Result = CollectProperty.CollectionResult.Collect,
                         CapturedTemplate="got_dob",
-                        PropertyName = "CapturedBirthday",
                         PromptTemplate="missing_dob",
                         Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Birthday" } }
                     },
                      
                     new CollectProperty
                     {
+                        PropertyName = "PaymentAmount",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Warning,
                         CapturedTemplate="got_payment_toolow",
-                        PropertyName = "PaymentAmount",
                         Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "<MinimumPayment" } }
                     },
                     new CollectProperty
                     {
+                        PropertyName = "PaymentAmount",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Warning,
                         CapturedTemplate="got_payment_toohi",
-                        PropertyName = "PaymentAmount",
                         Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { ">MaximumPayment" } }
                     },
                     new CollectProperty
                     {
+                        PropertyName = "PaymentDate",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Collect,
                         CapturedTemplate="got_payment_day",
-                        PropertyName = "PaymentDate",
                         PromptTemplate="missing_when",
                         Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes = new string[] { "Today" } }
                     },
                     new CollectProperty
                     {
+                        PropertyName = "PaymentAmount",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Collect,
                         CapturedTemplate="got_payment_amount",
-                        PropertyName = "PaymentAmount",
                         PromptTemplate="missing_payment",
                         Expression=new TokenMatchExpression{ Token="AmountToken", AnySubtypes = new string[] { "=MinimumPayment", ">MinimumPayment" } }
                     }
@@ -125,26 +128,26 @@ namespace Talk
                 {
                     new CollectProperty
                     {
+                        PropertyName = "NegativeEscalation",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Fail,
                         CapturedTemplate="negpos_escalation",
-                        PropertyName = "",
                         Expression=new TokenMatchExpression{ Token="KeywordToken", AnySubtypes=new string[] { "NegTacticalToken" , "NegIntentToken", "PosTacticalToken", "RejectToken" } }
                     },
                     new CollectProperty
                     {
+                        PropertyName = "FutureDate",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Fail,
                         CapturedTemplate="future_escalation",
-                        PropertyName = "",
                         Expression=new TokenMatchExpression{ Token="DateToken", AnySubtypes=new string[] { "Future" } }
                     },
                     new CollectProperty
                     {
+                        PropertyName = "pay_confirm",
                         Weight = 1,
                         Result = CollectProperty.CollectionResult.Collect,
                         CapturedTemplate="pay_confirm",
-                        PropertyName = "pay_confirm",
                         Expression=new TokenMatchExpression{ Token="KeywordToken", AnySubtypes=new string[] { "ConfirmToken" } }
                     }
                 }

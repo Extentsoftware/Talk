@@ -42,6 +42,29 @@ namespace Talk
                 // 
                 new DialogTest
                 {
+                    Description = "Escalate - incorrect dob > 2",
+                    IntentGroup = "PreDelinquent",
+                    CurrentIntent = "PreDelinquentInitial",
+                    Responses = new List<Response> {
+                        new Response{ Human = null,                 IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="InitialPrompt" } },
+                        new Response{ Human = "3/3/88",             IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" } },
+                        new Response{ Human = "4/4/99",             IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" } },
+                        new Response{ Human = "3/3/10",             IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new FailAction() },
+                    },
+                    Properties = new Dictionary<string, object>
+                    {
+                        { "Birthday", new DateTime(1999, 3, 3).Date },
+                        { "Person:FirstName", "Marcus" },
+                        { "Person:GivenName", "Poulton" },
+                        { "MinimumPayment", 12.0 },
+                        { "MaximumPayment", 24.0 },
+                        { "Last4Card", 1234.0 },
+                        { "DueDate", DateTime.Today.AddDays(1) },
+                    }
+                },
+                // 
+                new DialogTest
+                {
                     Description = "Happy path - missing dob on first pass",
                     IntentGroup = "PreDelinquent",
                     CurrentIntent = "PreDelinquentInitial",

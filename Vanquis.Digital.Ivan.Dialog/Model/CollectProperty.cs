@@ -66,5 +66,10 @@
         /// from a list of candidate token stream
         /// </summary>
         public double Weight;
+
+        /// <summary>
+        /// maximum number of times to try and collect this item.
+        /// </summary>
+        public int MaxTries;
     }
 }

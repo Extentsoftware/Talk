@@ -11,7 +11,7 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
         public class FailAction : TalkAction
         {
             public string Reason { get; set; }
-            public List<CollectPropertyMatch> Rejections { get; set; }
+            public List<CollectProperty> Rejections { get; set; }
         }
     }
 

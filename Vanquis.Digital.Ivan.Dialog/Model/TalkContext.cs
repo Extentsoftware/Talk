@@ -16,6 +16,11 @@ namespace Vanquis.Digital.Ivan.Dialog.Model
         public Dictionary<string, Token> CollectedData = new Dictionary<string, Token>();
 
         /// <summary>
+        /// maintain a count of the number of times the bot has to ask for a specific item
+        /// </summary>
+        public Dictionary<string, int> AskCount = new Dictionary<string, int>();
+
+        /// <summary>
         /// define the current conversation
         /// </summary>
         public string IntentGroup;

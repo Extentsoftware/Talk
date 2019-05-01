@@ -45,14 +45,13 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                 return new FailAction
                 {
                     Reason = $"Escalated because of {fail_matches.Count} rejection tokens",
-                    Rejections = fail_matches
+                    Rejections = fail_matches.Select(x=>x.Property).ToList()
                 };
             }
 
             HandleWarnings(matches, botResponse, currentStep, config, context);
 
             HandleCollectedData(matches, botResponse, currentStep, config, context);
-
 
             // got it all??
             if (GotValuesForStep(currentStep, config, context))
@@ -64,7 +63,15 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                 };
             }
 
-            // find missing data
+            // handle repeated failures
+            var failaction = HandleTooManyWarnings(matches, currentStep, config, context);
+            if (failaction != null)
+                return failaction;
+
+            failaction = HandleTooManyCollects(botResponse, currentStep, config, context);
+            if (failaction != null)
+                return failaction;
+
             HandleMissingItems(botResponse, currentStep, config, context);
 
             return new SayAction
@@ -181,24 +188,74 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
             }
         }
 
+        private static FailAction HandleTooManyWarnings(List<CollectPropertyMatch> matches, Intent currentStep, IDialogConfig config, TalkContext context)
+        {
+            // build a list of missing non-optional "Collect" items
+            var items = matches
+                .Select(x => x.Property)
+                .Where(x => x.MaxTries > 0 && x.Result == CollectProperty.CollectionResult.Warning)
+                .ToList();
+
+            return HandleTooManyRepeats(items, currentStep, config, context);
+        }
+
+        private static FailAction HandleTooManyCollects(List<string> botResponse, Intent currentStep, IDialogConfig config, TalkContext context)
+        {
+            // build a list of missing non-optional "Collect" items
+            var items = currentStep.DataToCollect
+                .Where(x => x.MaxTries > 0 && x.Optional == false && x.Result == CollectProperty.CollectionResult.Collect)
+                .ToList();
+
+            return HandleTooManyRepeats(items, currentStep, config, context);
+        }
+
+
+        private static FailAction HandleTooManyRepeats(List<CollectProperty> items, Intent currentStep, IDialogConfig config, TalkContext context)
+        {
+
+            // check the number times we have tried to collect this data
+            foreach (var item in items)
+            {
+                // add if new
+                var countkey = $"count_{item.PropertyName}";
+                if (!context.AskCount.ContainsKey(countkey))
+                    context.AskCount.Add(countkey, 0);
+
+                // increment
+                var tries = context.AskCount[countkey] + 1;
+                context.AskCount[countkey] = tries;
+
+                // check limit (MaxTries can be 0 for infinite retries)
+                if (item.MaxTries > 0 && tries == item.MaxTries)
+                    return new FailAction
+                    {
+                        Reason = $"Hi maximum. Got {item.PropertyName} {item.MaxTries} times",
+                        Rejections = new List<CollectProperty> { item }
+                    };
+            }
+            return null;
+        }
+
         private static void HandleMissingItems(List<string> botResponse, Intent currentStep, IDialogConfig config, TalkContext context)
         {
-            var missing = new List<CollectProperty>();
+            var missing_list = new List<CollectProperty>();
+
+            // build a list of missing non-optional "Collect" items
             foreach (var required in currentStep.DataToCollect.Where(x => x.Optional == false && x.Result == CollectProperty.CollectionResult.Collect))
                 if (!context.CollectedData.ContainsKey(required.PropertyName))
-                    missing.Add(required);
+                    missing_list.Add(required);
 
-            if (missing.Count > 1)
+            if (missing_list.Count > 1)
             {
                 botResponse.Add(MakeMessageFromKey(currentStep.InCompleteManyPrompt, config, context));
-                for (int i = 1; i <= missing.Count; i++)
-                    botResponse.Add($"{i}) " + MakeMessageFromKey(missing[i - 1].PromptTemplate, config, context));
+                for (int i = 1; i <= missing_list.Count; i++)
+                    botResponse.Add($"{i}) " + MakeMessageFromKey(missing_list[i - 1].PromptTemplate, config, context));
             }
 
-            if (missing.Count == 1)
+            if (missing_list.Count == 1)
             {
                 var s1 = MakeMessageFromKey(currentStep.InCompleteSinglePrompt, config, context);
-                var s2 = MakeMessageFromKey(missing[0].PromptTemplate, config, context);
+                var s2 = MakeMessageFromKey(missing_list[0].PromptTemplate, config, context);
                 botResponse.Add(s1 + s2);
             }
         }

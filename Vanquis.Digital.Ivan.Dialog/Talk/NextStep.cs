@@ -7,7 +7,7 @@
         /// </summary>
         public class NextStepAction : TalkAction
         {
-            public string Reason { get; set; }
+            public string Prompt { get; set; }
         }
     }
 

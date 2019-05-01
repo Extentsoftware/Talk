@@ -27,7 +27,7 @@ namespace Talk
                     { "future_escalation", "Escalated! - future_escalation" },
                     { "past_warning", "I dont recognise that date" },                    
                     { "got_dob", "Your birthday is [CapturedBirthday]" },
-                    { "got_payment_day", "You intend to pay on [PaymentDay]" },
+                    { "got_payment_day", "You intend to pay on [PaymentDate]" },
                     { "got_payment_amount", "You intend to pay £[PaymentAmount]" },
                     { "got_payment_toolow", "Your payment amount is too low" },
                     { "got_payment_toohi", "Your payment amount is too high" },
@@ -42,7 +42,7 @@ namespace Talk
                           Weight = 1,
                           Result = CollectProperty.CollectionResult.Fail,
                           CapturedTemplate="negpos_escalation",
-                          Expression=new TokenMatchExpression{ Token="KeywordToken", AnySubtypes=new string[] { "NegTacticalToken" , "NegIntentToken", "PosTacticalToken" } }
+                          Expression=new TokenMatchExpression{ Token="KeywordToken", AnySubtypes=new string[] { "NegativeIntent", "NegativeTacticalIntent", "PositiveIntent", "QuestionIntent", "FutureIntent" } }
                      },
                      new CollectProperty
                      {
@@ -119,7 +119,7 @@ namespace Talk
                     { "complete_single", "I just need to know " },
                     { "negpos_escalation", "Escalated!!" },
                     { "future_escalation", "Escalated!!" },
-                    { "pay_confirm", "got_payment_day [PaymentDay]" }
+                    { "pay_confirm", "got_payment_day [PaymentDate]" }
                 },
                 DataToCollect = new List<CollectProperty>
                 {

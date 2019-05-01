@@ -103,7 +103,7 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                 botResponse.Add(MakeMessageFromKey(currentStep.CompletePrompt, config, context));
                 return new NextStepAction
                 {
-                    Reason = string.Join("\n", botResponse)
+                    Prompt = string.Join("\n", botResponse)
                 };
             }
 

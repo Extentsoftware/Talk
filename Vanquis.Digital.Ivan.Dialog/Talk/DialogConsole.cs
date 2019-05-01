@@ -27,10 +27,13 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
         {
             public string Human;
             public TalkAction Bot;
+            public string IntentGroup;
+            public string CurrentIntent;
         }
 
         public class DialogTest
         {
+            public string Description;
             public string IntentGroup;
             public string CurrentIntent;
             public List<Response> Responses;
@@ -41,14 +44,61 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
         {
             List<DialogTest> tests = new List<DialogTest>
             {
+                                new DialogTest
+                {
+                     Description = "Escalate path - single step",
+                     IntentGroup = "PreDelinquent",
+                     CurrentIntent = "PreDelinquentInitial",
+                     Responses = new List<Response> {
+                        new Response{ Human = null,                 IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "3/3/99 12 tomorrow", IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new FailAction() },
+                     },
+                     Properties = new Dictionary<string, object>
+                     {
+                        { "Birthday", new DateTime(1999, 3, 3).Date },
+                        { "Person:FirstName", "Marcus" },
+                        { "Person:GivenName", "Poulton" },
+                        { "MinimumPayment", 12.0 },
+                        { "MaximumPayment", 24.0 },
+                        { "Last4Card", 1234.0 },
+                        { "DueDate", DateTime.Today.AddDays(1) },
+                     }
+                },
+                // 
                 new DialogTest
                 {
+                     Description = "escalate path - seperate steps",
+                     IntentGroup = "PreDelinquent",
+                     CurrentIntent = "PreDelinquentInitial",
+                     Responses = new List<Response> {
+                        new Response{ Human = null,             IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "3/3/99",         IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" } },
+                        new Response{ Human = "12",             IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" }},
+                        new Response{ Human = "tomorrow",       IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new FailAction()},
+                     },
+                     Properties = new Dictionary<string, object>
+                     {
+                        { "Birthday", new DateTime(1999, 3, 3).Date },
+                        { "Person:FirstName", "Marcus" },
+                        { "Person:GivenName", "Poulton" },
+                        { "MinimumPayment", 12.0 },
+                        { "MaximumPayment", 24.0 },
+                        { "Last4Card", 1234.0 },
+                        { "DueDate", DateTime.Today.AddDays(1) },
+                     }
+                },
+
+                // 
+                new DialogTest
+                {
+                    Description = "Happy path - nice and simple",
                     IntentGroup = "PreDelinquent",
                     CurrentIntent = "PreDelinquentInitial",
                     Responses = new List<Response> {
-                        new Response{ Human = null, Bot = new SayAction { Category="InitialPrompt" }  },
-                        new Response{ Human = "3/3/99 12 today", Bot = new NextStepAction()},
-                        new Response{ Human = "yes", Bot = new NextStepAction()}
+                        new Response{ Human = null,                 IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "3/3/99 12 today",    IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new NextStepAction()},
+                        new Response{ Human = null,                 IntentGroup = "PreDelinquent", CurrentIntent = "ConfirmPayment", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "yes",                IntentGroup = "PreDelinquent", CurrentIntent = "ConfirmPayment", Bot = new NextStepAction()}
                     },
                     Properties = new Dictionary<string, object>
                     {
@@ -61,16 +111,19 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                         { "DueDate", DateTime.Today.AddDays(1) },
                     }
                 },
+                // 
                 new DialogTest
                 {
+                    Description = "Happy path - seperate steps",
                      IntentGroup = "PreDelinquent",
                      CurrentIntent = "PreDelinquentInitial",
                      Responses = new List<Response> {
-                        new Response{ Human = null, Bot = new SayAction { Category="InitialPrompt" }  },
-                        new Response{ Human = "3/3/99", Bot = new SayAction { Category="MoreData" } },
-                        new Response{ Human = "12", Bot = new SayAction { Category="MoreData" }},
-                        new Response{ Human = "today", Bot = new NextStepAction()},
-                        new Response{ Human = "yes", Bot = new NextStepAction()}
+                        new Response{ Human = null,         IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "3/3/99",     IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" } },
+                        new Response{ Human = "12",         IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new SayAction { Category="MoreData" }},
+                        new Response{ Human = "today",      IntentGroup = "PreDelinquent", CurrentIntent = "PreDelinquentInitial", Bot = new NextStepAction()},
+                        new Response{ Human = null,         IntentGroup = "PreDelinquent", CurrentIntent = "ConfirmPayment", Bot = new SayAction { Category="InitialPrompt" }  },
+                        new Response{ Human = "yes",        IntentGroup = "PreDelinquent", CurrentIntent = "ConfirmPayment", Bot = new NextStepAction()}
                      },
                      Properties = new Dictionary<string, object>
                      {
@@ -82,7 +135,8 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                         { "Last4Card", 1234.0 },
                         { "DueDate", DateTime.Today.AddDays(1) },
                      }
-                }
+                },
+                // 
             };
 
             foreach( var test in tests)
@@ -94,7 +148,7 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
                     Properties = test.Properties
                 };
 
-                var passed = ExecuteTest(test.Responses, config, context, tokenisers);
+                var passed = ExecuteTest(test, config, context, tokenisers);
                 if (!passed)
                     return false;
             }
@@ -103,39 +157,112 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
             return true;
         }
     
-        public static bool ExecuteTest(List<Response> responses, IDialogConfig config, TalkContext context, IEnumerable<IEntityTokeniser> tokenisers)
+        public static bool ExecuteTest(DialogTest test, IDialogConfig config, TalkContext context, IEnumerable<IEntityTokeniser> tokenisers)
         {
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.WriteLine($"Executing: {test.Description}");
+            var botres = new string(' ', 1);
+            var humres = new string(' ', 30);
+            var botinfo = new string(' ', 60);
+
             var contextJson = JsonConvert.SerializeObject(context, jsonsettings);
 
-            foreach (var response in responses)
+            foreach (var response in test.Responses)
             {
+                // display current intent
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.WriteLine($"{botinfo} {context.IntentGroup}:{context.CurrentIntent} data:{context.CollectedData.Count}");
+
+                if (context.IntentGroup != response.IntentGroup || context.CurrentIntent != response.CurrentIntent)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"Test Failed: Incorrect intent: Expected {response.IntentGroup}:{response.CurrentIntent} but got {context.IntentGroup}:{context.CurrentIntent}");
+                    return false;
+                }
+
                 context = JsonConvert.DeserializeObject<TalkContext>(contextJson, jsonsettings);
 
-                var action = ProcessResponse(response.Human, config, context, tokenisers);
+                if (!string.IsNullOrEmpty(response.Human))
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"Human:                     {response.Human}");
+                }
 
-                contextJson = JsonConvert.SerializeObject(context, jsonsettings);
+                // get bot response
+                var action = ProcessResponse(response.Human, config, context, tokenisers);
 
                 if (action is SayAction sayAction)
                 {
-                    // check we have the right cetagory of response
-                    if (sayAction.Category != ((SayAction)response.Bot).Category)
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"Bot: {botres} {sayAction.Prompt}");
+
+                    if ( typeof(SayAction) != response.Bot.GetType())
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.WriteLine($"Test Failed: Expected Bot response of type {response.Bot.GetType().Name} but got {action.GetType().Name}");
                         return false;
+                    }
+
+                    // check we have the right cetagory of response
+                    var expected_category = ((SayAction)response.Bot).Category;
+                    if (sayAction.Category != expected_category)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.WriteLine($"Test Failed: Expected Bot category of {expected_category} but got {sayAction.Category}");
+                        return false;
+                    }
                 }
 
                 if (action is FailAction failAction)
                 {
-                    if (response.Bot.GetType() != typeof(FailAction))
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"Bot Fail: {botres} {failAction.Reason}");
+
+                    if (typeof(FailAction) != response.Bot.GetType())
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.WriteLine($"Test Failed: Expected Bot response of type {response.Bot.GetType().Name} but got {action.GetType().Name}");
                         return false;
+                    }
+
                     FailDefaultAction(config, context);
                 }
 
                 if (action is NextStepAction nextAction)
                 {
-                    if (response.Bot.GetType() != typeof(NextStepAction))
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine($"Bot Step: {botres} {nextAction.Prompt}");
+
+                    if (typeof(NextStepAction) != response.Bot.GetType())
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.WriteLine($"Test Failed: Expected Bot response of type {response.Bot.GetType().Name} but got {action.GetType().Name}");
                         return false;
+                    }
+
                     NextStepDefaultAction(config, context);
                 }
+
+                // save context in json
+                contextJson = JsonConvert.SerializeObject(context, jsonsettings);
+
             }
+
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine($"Test Passed\n\n");
 
             return true;
         }

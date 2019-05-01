@@ -3,9 +3,14 @@ using Vanquis.Digital.Ivan.Dialog.EntityExtractor;
 
 namespace Vanquis.Digital.Ivan.Dialog.Model
 {
-    class CollectPropertyMatch
+    public class CollectPropertyMatch
     {
         public CollectProperty Property;
         public List<Token> MatchingTokens;
+
+        public override string ToString()
+        {
+            return $"{Property.PropertyName} {string.Join(", ", MatchingTokens)}";
+        }
     }
 }

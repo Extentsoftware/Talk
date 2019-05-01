@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using Vanquis.Digital.Ivan.Dialog.Model;
 using Vanquis.Digital.Ivan.Dialog.Talk;
+using Vanquis.Digital.Ivan.Dialog.Talk.TestConsole;
 using Vanquis.Digital.Ivan.Dialog.Tokenisers;
 
 namespace Talk
@@ -37,7 +38,7 @@ namespace Talk
 
             _serviceProvider = services.BuildServiceProvider();
 
-            var config = BuildSample.Build(talkConfig);
+            var config = BuildConfig.Build(talkConfig);
 
             //var list = Talk.ParseText(context.Properties, "please take money 20 3rd march 1999 hate this stuff paid marcus poulton", _serviceProvider);
             using (var scope = _serviceProvider.CreateScope())
@@ -63,11 +64,17 @@ namespace Talk
 
                 var tokenisers = scope.ServiceProvider.GetServices<IEntityTokeniser>();
 
-                var passed = DialogConsole.ExecuteBulkTest(config, tokenisers);
+                var tests = BuildTest.Build();
+                var passed = DialogTestEngine.ExecuteBulkTest(config, tokenisers, tests);
 
 
-                DialogConsole.ExecuteAsConsole(config, context, tokenisers);
+                // DialogConsole.ExecuteAsConsole(config, context, tokenisers);
             }
+        }
+
+        public static void RunConsole()
+        {
+
         }
 
         public static DialogConfig BuildConfiguration()

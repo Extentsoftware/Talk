@@ -10,51 +10,7 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
 {
     public static partial class DialogEngine
     {
-        public static void PerformStep(
-            IDialogConfig config, 
-            TalkContext context,
-            IEnumerable<IEntityTokeniser> tokenisers,
-            Action<string> Say,
-            Func<string> GetResponse
-            )
-        {
-            bool quit = false;
-            string humanText = null;
-
-            do
-            {
-                TalkAction action = ProcessResponse(humanText, config, context, tokenisers);
-
-                if (action is FailAction failAction)
-                    FailDefaultAction(config, context);
-
-                if (action is SayAction sayAction)
-                {
-                    // send
-                    Say(sayAction.Prompt);
-
-                    humanText = GetResponse();
-
-                    if (string.IsNullOrEmpty(humanText))
-                        break;
-
-                    continue;
-                }
-
-                if (action is NextStepAction nextAction)
-                {
-                    // get next intent from the route
-                    humanText = null;
-                    NextStepDefaultAction(config, context);
-                }
-
-                if (context.CurrentIntent == null)
-                    quit = true;
-
-            } while (!quit);
-
-        }
-
+       
         public static TalkAction ProcessResponse(
             string humanText,
             IDialogConfig config,
@@ -88,7 +44,8 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
             {
                 return new FailAction
                 {
-                    Reason = $"Escalated because of {fail_matches.Count} rejection tokens"
+                    Reason = $"Escalated because of {fail_matches.Count} rejection tokens",
+                    Rejections = fail_matches
                 };
             }
 
@@ -392,7 +349,8 @@ namespace Vanquis.Digital.Ivan.Dialog.Talk
         /// <returns></returns>
         private static List<Token> MostLikely(this List<List<Token>> flattenedTree, List<CollectProperty> collectProperties)
         {
-            return flattenedTree.OrderByDescending(x => x.Weight(collectProperties)).FirstOrDefault();
+            // calculated as the average weight of the response
+            return flattenedTree.OrderByDescending(x => x.Weight(collectProperties)/x.Count).FirstOrDefault();
         }
     }
 }
